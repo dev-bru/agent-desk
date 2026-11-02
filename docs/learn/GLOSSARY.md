@@ -1,0 +1,60 @@
+# Glossary
+
+- **Agent**: code that uses an LLM to choose a step. Here: triage and the resolver.
+- **At-least-once**: a message is delivered one or more times, never silently lost.
+- **At-most-once**: a message is delivered zero or one time; a crash can lose it.
+- **Attempt header**: `attempt`, the try number, set by the runner (`runner.py:55`).
+- **Backoff**: waiting longer after each failure. Here `base * 2^(n-1)`.
+- **BadMessage**: error for a message that cannot be read safely; goes to the DLQ at once (`messages.py:9`).
+- **Bus**: the thing that carries messages. `Bus` protocol in `bus.py:35`.
+- **Checkpoint**: a saved copy of graph state after a node. Stored by `SqliteSaver`.
+- **Checkpointer**: the LangGraph part that saves and loads checkpoints.
+- **Commit (offset)**: tell the bus "I finished this record". Here it comes last.
+- **Conditional edge**: a graph arrow chosen by a function (`route`, `resolver.py:128`).
+- **Consumer**: code that reads records from topics.
+- **Consumer group**: consumers that share one stream of work; each group gets every record once.
+- **Dead letter / DLQ**: topic for messages that failed for good, with reason headers.
+- **Discriminated union**: Pydantic union picked by one field (`type`).
+- **Edge**: arrow between graph nodes.
+- **Envelope**: the common wrapper of every event: `message_id`, `ticket_id`, `type`, `created_at`, `payload`.
+- **Event**: a record of something that happened, such as `ticket.created`.
+- **Exactly-once**: each message has its effect once. Not claimed by this project.
+- **FastMCP**: Python library to build MCP servers and clients.
+- **Graph (LangGraph)**: nodes plus edges over a shared state.
+- **Handled store**: SQLite table of finished idempotency keys (`handled.py`).
+- **Header**: small key-value metadata on a record (`idempotency-key`, `attempt`, `dlq-*`).
+- **Idempotent**: doing it again has no extra effect.
+- **Idempotency key**: stable string for one unit of work, `<ticket_id>:<stage>`.
+- **interrupt**: LangGraph call that pauses a graph until resumed.
+- **Jitter**: small random extra delay to spread retries.
+- **Kafka**: distributed log for events. Planned here (F-010).
+- **KRaft**: Kafka mode with no ZooKeeper.
+- **Key (record)**: value that picks the partition and keeps order; here `ticket_id`.
+- **LangGraph**: library for stateful LLM workflows as graphs.
+- **LiteLLM**: one Python API for many LLM providers.
+- **MCP (Model Context Protocol)**: standard for letting models call tools on a server.
+- **MemoryBus**: in-process bus that copies the rules of a real broker (`bus.py:47`).
+- **Message id**: UUID of one message. The resolver result uses UUID5 so a re-publish is identical.
+- **Node**: one step in a graph; a function from state to state update.
+- **Offset**: position of a record in a topic.
+- **Partition**: one ordered lane of a topic.
+- **Payload**: the type-specific body of an envelope.
+- **Poison message**: a message that can never succeed (bad JSON). Not retried.
+- **Producer**: code that publishes records.
+- **Pydantic**: Python library for data models and validation.
+- **Record**: topic, key, value bytes, headers, offset (`bus.py:9`).
+- **Redelivery**: the bus gives the same record again because it was not committed.
+- **Repair prompt**: one extra message asking the model to fix invalid JSON (`triage.py:51`).
+- **Replay**: republish a dead letter to its source topic (`runner.py:101`).
+- **Runner**: the loop that wraps a handler with idempotency, retry, DLQ, commit (`runner.py:20`).
+- **ScriptedModel**: fake model that replays a fixed list of replies (`fakes.py:14`).
+- **SqliteSaver**: LangGraph checkpointer that writes to a SQLite file.
+- **State (graph)**: the shared dict passed between nodes (`ResolverState`).
+- **Structured output**: model output forced into a fixed shape and then validated.
+- **stdio transport**: MCP over the child process's standard input and output.
+- **Thread id**: LangGraph key for one run's checkpoints. Here the ticket id.
+- **Tool (MCP)**: a function a model may call through the server.
+- **ToolError**: FastMCP error that becomes an `isError` result.
+- **Topic**: named log, such as `desk.tickets`.
+- **Trust boundary**: place where data from outside enters and must be validated.
+- **UUID5**: UUID made from a name; the same name gives the same id.

@@ -8,3 +8,4 @@ agent-desk.toml
 runs/
 *.sqlite
 *.db
+.codex-tmp/
