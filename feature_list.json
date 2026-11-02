@@ -127,7 +127,9 @@
         "CLI approve publishes a decision; web approver lists and posts decisions and binds to 127.0.0.1 only"
       ],
       "test_command": "uv run pytest tests/test_approval.py tests/test_approver.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793623123,
+      "baseline_tests": 6
     },
     {
       "id": "F-008",
@@ -143,7 +145,9 @@
         "spans carry ticket_id and topic attributes; OTLP export is off by default"
       ],
       "test_command": "uv run pytest tests/test_logging.py tests/test_tracing.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793623129,
+      "baseline_tests": 3
     },
     {
       "id": "F-009",
@@ -160,7 +164,9 @@
         "eval writes runs/eval-<time>.json with model name and set size; results command prints a table"
       ],
       "test_command": "uv run pytest tests/test_simulator.py tests/test_evals.py tests/test_cli.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793623138,
+      "baseline_tests": 14
     },
     {
       "id": "F-010",
