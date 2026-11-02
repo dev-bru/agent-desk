@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "project": "agent-desk",
+  "_rules": "Every feature starts failing. Status changes ONLY via scripts/verify_feature.py after tests run.",
+  "features": [
+    {
+      "id": "F-001",
+      "title": "Project setup, settings file, test markers, dependency record",
+      "req_ids": ["REQ-001", "REQ-002", "REQ-070"],
+      "acceptance": [
+        "uv sync --locked succeeds; runtime deps pinned with ==",
+        "agent-desk --help runs and lists simulate, run, approve, eval",
+        "settings load defaults from agent-desk.example.toml; AGENT_DESK_REFUND_LIMIT overrides the limit",
+        "kafka and live markers registered; default run deselects them; socket guard blocks non-loopback connects",
+        "no keys or user paths in src, tests, lessons; every pyproject dependency is listed in docs/DEPENDENCIES.md"
+      ],
+      "test_command": "uv run pytest tests/test_settings.py tests/test_project.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-002",
+      "title": "Message schemas, Bus interface, MemoryBus",
+      "req_ids": ["REQ-010", "REQ-012"],
+      "acceptance": [
+        "envelope and payload models round-trip to JSON; bad input raises BadMessage naming the field",
+        "same key is read in publish order",
+        "two consumers in one group share messages; two groups each get all",
+        "uncommitted message is redelivered; committed message is not"
+      ],
+      "test_command": "uv run pytest tests/test_messages.py tests/test_memory_bus.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-003",
+      "title": "Consumer runner: idempotency, retries with backoff, dead letter, replay",
+      "req_ids": ["REQ-020", "REQ-021", "REQ-022"],
+      "acceptance": [
+        "same message handled twice runs the handler once; handled store survives a restart (file-backed)",
+        "handler failing twice then succeeding is called three times; delays follow base*2^(n-1) plus bounded jitter with an injected clock",
+        "BadMessage goes to desk.dead-letter at once; transient failure goes after max_attempts; dlq headers set",
+        "consumer handles the next message after a dead letter; replay republishes to the source topic"
+      ],
+      "test_command": "uv run pytest tests/test_handled.py tests/test_runner.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-004",
+      "title": "Seeded shop DB and FastMCP shop server",
+      "req_ids": ["REQ-032"],
+      "acceptance": [
+        "seed builds the SQLite DB from fixed data; running it twice gives the same rows",
+        "lookup_order, shipment_status, refund_policy return seeded data for known ids",
+        "unknown id returns an isError result naming the id; no exception leaves the server",
+        "issue_refund with the same idempotency key refunds once"
+      ],
+      "test_command": "uv run pytest tests/test_shop_db.py tests/test_mcp_server.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-005",
+      "title": "LLM client on LiteLLM, ScriptedModel, triage agent",
+      "req_ids": ["REQ-030", "REQ-031"],
+      "acceptance": [
+        "chat() passes model string, api_base and timeout to a patched litellm.completion",
+        "missing provider key error names the env var, never a value; connection, timeout and 4xx map to ModelDown, ModelTimeout, ModelError",
+        "triage with the scripted model publishes category and priority to desk.work",
+        "invalid model output gets one repair prompt, then raises; triage is idempotent"
+      ],
+      "test_command": "uv run pytest tests/test_model.py tests/test_fakes.py tests/test_triage.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-006",
+      "title": "Resolver LangGraph graph with SQLite checkpointer and MCP tools",
+      "req_ids": ["REQ-033", "REQ-036"],
+      "acceptance": [
+        "status ticket reaches reply with no approval; refund at or below the limit goes decide, act, reply",
+        "step limit (default 8 model calls) stops the graph with a clear message",
+        "graph stopped after gather and rebuilt from the same checkpoint file does not repeat gather",
+        "resolver publishes exactly one result per idempotency key to desk.results"
+      ],
+      "test_command": "uv run pytest tests/test_resolver.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-007",
+      "title": "Human approval flow: interrupt, decisions topic, CLI and web approver",
+      "req_ids": ["REQ-034", "REQ-035"],
+      "acceptance": [
+        "refund above the limit publishes approval.requested and the graph stops; other tickets keep flowing",
+        "approve issues the refund once; reject declines with the reviewer note; duplicate decision does nothing",
+        "resolver restarted between request and decision still resumes",
+        "CLI approve publishes a decision; web approver lists and posts decisions and binds to 127.0.0.1 only"
+      ],
+      "test_command": "uv run pytest tests/test_approval.py tests/test_approver.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-008",
+      "title": "Structured logs and OpenTelemetry traces across hops",
+      "req_ids": ["REQ-040", "REQ-041"],
+      "acceptance": [
+        "every log line for a ticket has ts, level, component, ticket_id, message_id, trace_id, attempt, event",
+        "no log line contains an API key value",
+        "spans of one ticket (simulate, triage, resolve, approve) share one trace id through message headers",
+        "spans carry ticket_id and topic attributes; OTLP export is off by default"
+      ],
+      "test_command": "uv run pytest tests/test_logging.py tests/test_tracing.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-009",
+      "title": "Ticket simulator, CLI wiring, triage eval",
+      "req_ids": ["REQ-013", "REQ-050", "REQ-036"],
+      "acceptance": [
+        "data/tickets.jsonl holds at least 40 labeled tickets; same seed gives same order",
+        "--poison N adds malformed messages; --duplicate N re-sends ids",
+        "eval triage with a copying script gives accuracy 1.0; with one wrong gives (n-1)/n and a confusion cell",
+        "eval writes runs/eval-<time>.json with model name and set size; results command prints a table"
+      ],
+      "test_command": "uv run pytest tests/test_simulator.py tests/test_evals.py tests/test_cli.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-010",
+      "title": "Native Kafka on Windows (KRaft, PowerShell script), KafkaBus, topics, opt-in Kafka tests",
+      "req_ids": ["REQ-003", "REQ-011", "REQ-070"],
+      "acceptance": [
+        "broker config template has KRaft settings, no ZooKeeper, loopback listener, high retention; kafka-local.ps1 exists; README commands name existing files and state the Windows and EC2 fallback caveats (offline test)",
+        "KafkaBus commits the offset only after the handler returns (offline test with a fake client)",
+        "kafka-marked tests (opt-in, need AGENT_DESK_KAFKA_BOOTSTRAP): publish and consume round-trip with headers; topics create is repeatable; failed handler is redelivered",
+        "pytest -m kafka without the env var skips with a reason; with it but no broker, fails fast with one clear message"
+      ],
+      "test_command": "uv run pytest tests/test_kafka_local_doc.py tests/test_kafka_bus_offline.py",
+      "status": "failing"
+    },
+    {
+      "id": "F-011",
+      "title": "Lessons 01-06, README, comment check",
+      "req_ids": ["REQ-023", "REQ-060", "REQ-061"],
+      "acceptance": [
+        "each lesson script runs offline with --fake and exits 0",
+        "each lesson names the concept, command, expected output and files to read",
+        "every src module has a docstring and every public function has a docstring",
+        "docs and lessons say exactly-once only in a sentence that denies the claim"
+      ],
+      "test_command": "uv run pytest tests/test_lessons.py tests/test_docs_style.py",
+      "status": "failing"
+    }
+  ]
+}

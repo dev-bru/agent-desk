@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.pytest_cache/
+agent-desk.toml
+.env
+.agent-desk/
+runs/
+*.sqlite
+*.db
