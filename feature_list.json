@@ -200,7 +200,9 @@
         "docs and lessons say exactly-once only in a sentence that denies the claim"
       ],
       "test_command": "uv run pytest tests/test_lessons.py tests/test_docs_style.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793624075,
+      "baseline_tests": 21
     }
   ]
 }
