@@ -45,7 +45,7 @@ two interview questions. Line numbers were checked on 2026-11-02 against the cur
   first (decision D-004, D-013 in `docs/DECISIONS.md`). Kafka on Windows is dev only (D-017).
 - **Not picked.** Redpanda (D-002), RabbitMQ or SQS (no replayable log by default; UNVERIFIED detail), Avro and a
   schema registry (D-014).
-- **Mistakes.** Using Kafka for a tiny single-process job; claiming exactly-once.
+- **Mistakes.** Using Kafka for a tiny single-process job; exactly-once is not claimed here.
 - **Q1.** *Kafka vs a queue?* Kafka keeps a log you can re-read; a classic queue deletes a message when acked.
 - **Q2.** *Why a fake bus?* Fast offline tests; the interface stays small; Kafka is a thin adapter.
 
@@ -53,12 +53,12 @@ two interview questions. Line numbers were checked on 2026-11-02 against the cur
 
 - **eli5.** "I will keep delivering until you tell me you finished." If you finish but your thank-you is lost, I
   deliver again. You may see a note twice, never zero times.
-- **Why.** The honest choice: no lost work. Exactly-once across a broker and a database is hard to prove.
+- **Why.** The honest choice: no lost work. Exactly-once across a broker and a database is not claimed here.
 - **Here.** Commit after the handler: `runner.py:68`. `MemoryBus` claims a record and only `commit` marks it done
   (`bus.py:101`); `close` releases it (`bus.py:110`). Test: `tests/test_memory_bus.py:45`;
   `tests/test_runner.py:22` fails the commit and checks the redelivery does the work once.
-- **Not picked.** At-most-once (commit first; a crash loses work). Exactly-once claims (D-003).
-- **Mistakes.** Commit before the work; claiming "exactly-once" for effects outside the broker.
+- **Not picked.** At-most-once (commit first; a crash loses work). Exactly-once is not claimed (D-003).
+- **Mistakes.** Commit before the work; do not claim "exactly-once" for effects outside the broker.
 - **Q1.** *Where can duplicates come from?* Crash between handler and commit; consumer rebalance; replay.
 - **Q2.** *Why commit last?* A crash before the commit means redelivery (safe); after means loss (unsafe).
 
@@ -74,8 +74,8 @@ two interview questions. Line numbers were checked on 2026-11-02 against the cur
 - **Not picked.** Dedup in memory (lost on restart; test `tests/test_handled.py:10`). A distributed lock.
 - **Mistakes.** Key in a different transaction from the effect; a key that is too coarse (blocks a legit second
   refund) or too fine (random UUID defeats the point); idempotency only in the consumer, not the tool.
-- **Q1.** *Idempotent vs exactly-once?* Idempotent means repeats have no extra effect; exactly-once means the
-  system delivers once. We build the first.
+- **Q1.** *Why is idempotency not an exactly-once claim?* Idempotent means repeats have no extra effect;
+  exactly-once delivery is not claimed by this project. We build idempotent consumers.
 - **Q2.** *Why is the key table in the same transaction?* Else a crash can save the key but lose the effect, or the
   reverse.
 

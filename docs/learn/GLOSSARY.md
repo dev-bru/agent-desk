@@ -18,7 +18,7 @@
 - **Edge**: arrow between graph nodes.
 - **Envelope**: the common wrapper of every event: `message_id`, `ticket_id`, `type`, `created_at`, `payload`.
 - **Event**: a record of something that happened, such as `ticket.created`.
-- **Exactly-once**: each message has its effect once. Not claimed by this project.
+- **Exactly-once**: each message has its effect once; this is not claimed by this project.
 - **FastMCP**: Python library to build MCP servers and clients.
 - **Graph (LangGraph)**: nodes plus edges over a shared state.
 - **Handled store**: SQLite table of finished idempotency keys (`handled.py`).

@@ -1009,7 +1009,7 @@ const flows = {
      "publish then commit"
     ],
     "chipsKafka": [
-     "no exactly-once claim"
+     "exactly-once is not claimed"
     ]
    },
    {
@@ -1351,7 +1351,7 @@ const flows = {
     "color": "--c-vector",
     "title": "Commit offset after the handler",
     "route": "KafkaBus commit (planned)",
-    "desc": "Commit only after success or after the DLQ publish. A crash before the commit means Kafka redelivers. The handled store makes the repeat harmless. Result: at-least-once, never claimed exactly-once.",
+    "desc": "Commit only after success or after the DLQ publish. A crash before the commit means Kafka redelivers. The handled store makes the repeat harmless. Result: at-least-once; exactly-once is not claimed.",
     "payload": "consumer.commit(message=record, asynchronous=False)",
     "chips": [
      "PLANNED",

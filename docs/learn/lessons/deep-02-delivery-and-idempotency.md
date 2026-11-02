@@ -35,7 +35,7 @@ sequenceDiagram
 - **Key in the same transaction as the effect** (`handled.py:21-36`). Alternatives: an in-memory set (lost on
   restart, `tests/test_handled.py:10`); key saved first (loses work on crash); a distributed lock (more moving
   parts).
-- **No exactly-once claim** (D-003). The effect and the broker cannot share one transaction here.
+- **Exactly-once is not claimed** (D-003). The effect and the broker cannot share one transaction here.
 - **Three layers**, because the handler may call things outside its own database:
   1. handled store `Handled.run`,
   2. a fixed UUID5 message id for the result (`resolver.py:161`),

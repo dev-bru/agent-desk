@@ -30,7 +30,7 @@ reliability patterns. Also a reader (a hiring manager or peer) who skims the REA
 - Lessons 01-06 and, later, an interactive architecture diagram.
 
 ## Scope (out)
-- Exactly-once delivery. The project explains at-least-once plus idempotent consumers instead.
+- Exactly-once delivery is not claimed. The project explains at-least-once plus idempotent consumers instead.
 - Real payments, real customers, real email.
 - Multi-broker clusters, schema registry, Kafka Streams.
 - Auth, multi-tenant, production hosting.

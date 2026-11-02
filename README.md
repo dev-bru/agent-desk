@@ -69,12 +69,48 @@ repeated requests and hiding tickets that have a decision.
 
 ## Learn and check
 
-Read `lessons/05-approvals.md`, `lessons/observability.md` and
-`lessons/simulation-and-eval.md` for commands, expected output and code references.
-The existing `docs/learn/` pack is preserved as the F-001 through F-006 learning snapshot.
+Work through the six runnable lessons in order. Each document explains the logic,
+shows a `--fake` command and its expected output, points to the code, and ends with
+a quiz. Run the scripts from this project folder using the supplied environment.
+
+| Lesson | Concept | Script |
+|---|---|---|
+| [01](lessons/01-event-basics.md) | Events, topics, validation, commit | `lessons/01-event-basics.py --fake` |
+| [02](lessons/02-consumer-groups.md) | Group sharing and redelivery | `lessons/02-consumer-groups.py --fake` |
+| [03](lessons/03-agent-as-consumer.md) | Triage, scripted answers, handled keys | `lessons/03-agent-as-consumer.py --fake` |
+| [04](lessons/04-graph-state.md) | Saved graph state and restart | `lessons/04-graph-state.py --fake` |
+| [05](lessons/05-approvals.md) | Human decision and resume | `lessons/05-approvals.py --fake` |
+| [06](lessons/06-failures.md) | Retries, dead letters, replay | `lessons/06-failures.py --fake` |
+
+```powershell
+.venv/Scripts/python.exe -B lessons/01-event-basics.py --fake
+.venv/Scripts/python.exe -B -m pytest tests/test_lessons.py tests/test_docs_style.py --basetemp=.pytest-tmp-f011
+```
+
+The first command prints `Read ticket.created for T-1 at offset 0`, followed by
+`Committed; no pending event`. The test command runs every lesson with external
+and Kafka connections and live model calls blocked in its child process, then
+compares stdout with its documented output. Local sockets used by Windows asyncio
+are allowed, as in the main offline test guard. The tests also check module and
+public function docstrings, delivery wording, and source
+references. Lessons 04 and 05 create and remove their own `.pytest-tmp-lesson*`
+folders under this project. The other lessons keep state in memory.
+
+Read [observability](lessons/observability.md) and
+[simulation and eval](lessons/simulation-and-eval.md) for the F-008 and F-009
+walkthroughs. Continue with the existing [deeper learning pack](docs/learn/00-START-HERE.md),
+[topic map](docs/learn/TOPICS.md), and [offline diagram](docs/learn/architecture.html).
+That pack is an F-001 through F-006 snapshot: its statements that approvals,
+tracing, and evals are still planned describe that earlier state. F-007 through
+F-009 are implemented today. Kafka, its native Windows startup script, and
+cross-process topic delivery are coming with F-010; use MemoryBus today.
+
 Tests use scripted models, a memory bus and temporary SQLite files. They need no
 broker or model server. Kafka and live tests remain opt-in. If `uv` runs on your
-host, `uv run pytest` is the equivalent offline test command. Ruff is not configured.
+host, `uv run pytest --basetemp=.pytest-tmp-offline` is the equivalent offline test
+command. Use `uv run pytest tests/test_lessons.py tests/test_docs_style.py
+--basetemp=.pytest-tmp-f011` for F-011. No package install is needed. Live tests
+must be marked `live` and selected explicitly. Ruff is not configured.
 
 Quiz: What happens if triage crashes after publishing work? Why can a human pause
 survive a resolver restart? What does a perfect score from the copying fake prove?

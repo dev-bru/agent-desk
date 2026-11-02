@@ -86,7 +86,7 @@ committed. `agent-desk dlq list|replay` shows and replays them.
 - AC2: the consumer keeps running and handles the next message.
 - AC3: `dlq replay` republishes to the source topic and the message is handled when the cause is fixed.
 
-**REQ-023 (M, I) No exactly-once claim.** README and lesson 06 explain at-least-once plus idempotent consumers.
+**REQ-023 (M, I) Exactly-once is not claimed.** README and lesson 06 explain at-least-once plus idempotent consumers.
 - AC1: a test greps docs and lessons: the words "exactly-once" appear only in a sentence that denies the claim
   (the sentence contains "not").
 

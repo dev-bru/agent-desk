@@ -11,8 +11,8 @@ Real Kafka is the skill employers name. KRaft needs no ZooKeeper, so one process
 and uses less memory, but speaks only the Kafka API, and its tools differ. Switch to Redpanda if native Kafka is
 too heavy or unstable on Windows (UNVERIFIED on this PC; measure at F-010). Runs natively, not in Docker (D-017).
 
-## D-003 At-least-once plus idempotent consumers; no exactly-once claim (human, idea)
-Exactly-once across Kafka and an external database is hard and easy to overclaim. The honest design is
+## D-003 At-least-once plus idempotent consumers; exactly-once is not claimed (human, idea)
+Exactly-once across Kafka and an external database is not claimed here. The honest design is
 at-least-once with idempotency keys. The docs explain why.
 
 ## D-004 Bus interface with a memory fake (ASSUMPTION)

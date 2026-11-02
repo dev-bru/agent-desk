@@ -40,7 +40,7 @@ block the line, and every test must run offline.
 
 | Choice | Why | Cost |
 |---|---|---|
-| At-least-once plus idempotency, no exactly-once claim | Honest and provable; exactly-once across broker and DB is hard | Every consumer needs a key and care |
+| At-least-once plus idempotency; exactly-once is not claimed | Honest and provable; a broker and DB do not share a transaction here | Every consumer needs a key and care |
 | Commit offset last | Crash means redelivery, not loss | Duplicates are possible |
 | Handled key in the same SQLite transaction as the effect | Atomic: effect and key together | Only covers effects inside that database; a publish is outside it (known gap) |
 | Own 15-line retry loop | Lesson stays visible; injected clock makes tests exact | No circuit breaker, no per-error policy |
