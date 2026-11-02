@@ -1,0 +1,8 @@
+bootstrap = "localhost:9092"
+refund_limit = 50.00
+max_attempts = 3
+backoff_base_s = 1.0
+model = "openai/qwen"
+api_base = "http://127.0.0.1:8080/v1"
+db_path = "data/shop.sqlite"
+checkpoint_path = ".agent-desk/checkpoints.sqlite"

@@ -1,38 +1,26 @@
 # Agent Desk: dependencies
 
-Planned only. Nothing is installed. Every version is "pin at setup": at F-001 the orchestrator checks PyPI (or the
-download page), picks an exact version, records the source and date here, and asks the human to approve before
-install. Exact hashes live in `uv.lock`. Labels: MEASURED, DOCUMENTED (URL + date), UNVERIFIED.
+Exact direct versions read from the existing `uv.lock` on 2026-11-02.
+The environment was supplied already installed. No packages were installed or changed.
+Hashes and transitive versions remain in `uv.lock`. Licences and upstream releases were not checked (offline).
 
-## Python packages (direct, planned)
-| Package | Version | Licence | Why | Source |
-|---|---|---|---|---|
-| langgraph | pin at setup | check at setup | Resolver graph | UNVERIFIED |
-| langgraph-checkpoint-sqlite | pin at setup | check at setup | SQLite checkpointer | UNVERIFIED |
-| litellm | pin at setup | check at setup | One API for every model provider | UNVERIFIED |
-| langchain-litellm | pin at setup (only if the graph needs a chat model object) | check at setup | `ChatLiteLLM` for LangGraph | UNVERIFIED |
-| fastmcp | pin at setup | check at setup | Shop MCP server and client | UNVERIFIED |
-| confluent-kafka | pin at setup (F-010) | check at setup | Kafka client | UNVERIFIED |
-| pydantic | pin at setup | check at setup | Message models | UNVERIFIED |
-| opentelemetry-api | pin at setup | check at setup | Trace API | UNVERIFIED |
-| opentelemetry-sdk | pin at setup | check at setup | Spans and exporters | UNVERIFIED |
-| tzdata | pin at setup | check at setup | Time zones on Windows | UNVERIFIED |
-| pytest (dev) | pin at setup | check at setup | Tests | UNVERIFIED |
-| pytest-xdist (dev) | pin at setup (optional) | check at setup | Parallel offline tests | UNVERIFIED |
+| Package | Version | Use |
+|---|---|---|
+| langgraph | 1.2.18 | runtime |
+| langgraph-checkpoint-sqlite | 3.1.3 | runtime |
+| litellm | 1.106.6 | runtime |
+| langchain-litellm | 0.11.2 | runtime |
+| fastmcp | 4.1.4 | runtime |
+| pydantic | 2.14.2 | runtime |
+| opentelemetry-api | 1.45.2 | runtime |
+| opentelemetry-sdk | 1.45.2 | runtime |
+| confluent-kafka | 2.16.1 | runtime |
+| tzdata | 2026.6 | runtime |
+| pytest | 9.2.0 | dev |
+| pytest-xdist | 3.8.0 | dev |
 
-## Runtime tools (host, installed by the human at F-010; no Docker, D-017)
-| Tool | Version | Why | Source |
-|---|---|---|---|
-| Java 21 Temurin JDK | pin at F-010 | Runs the Kafka broker | UNVERIFIED |
-| Apache Kafka binary distribution (KRaft mode) | pin at F-010 | Development broker on Windows; not supported for production | UNVERIFIED |
-| Remote Kafka on AWS EC2 (optional fallback) | not installed | Documented fallback; no resource created by agents | UNVERIFIED |
+The build backend is hatchling, declared without a version in the existing pyproject.toml.
+It is not a runtime dependency and has no entry in the supplied uv.lock.
 
-## Not used
-- Redpanda: see D-002.
-- A retry library: see D-010.
-- Flask or FastAPI: see D-012.
-
-## Supply chain
-Exact `==` pins, hashes in `uv.lock`. Review each package and its transitive packages before install. LiteLLM had
-bad releases in 2026 (UNVERIFIED detail): check the release notes before pinning. Resolve conflicts (for example
-`mcp` version ranges between fastmcp and LangChain packages) at setup and record the result here.
+Java 21 Temurin JDK and the Apache Kafka binary distribution are deferred to F-010.
+Their host installation and exact versions are unverified. No Docker or cloud resources are used.
