@@ -183,7 +183,9 @@
         "pytest -m kafka without the env var skips with a reason; with it but no broker, fails fast with one clear message"
       ],
       "test_command": "uv run pytest tests/test_kafka_local_doc.py tests/test_kafka_bus_offline.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793634380,
+      "baseline_tests": 10
     },
     {
       "id": "F-011",
