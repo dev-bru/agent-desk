@@ -1,0 +1,1 @@
+P3: event-driven multi-agent support desk for an online shop. Kafka (Docker) topics carry tickets; agents are consumers (triage, order lookup via MCP tools, refund proposals); LangGraph workflow with durable state; human approval for risky actions; dead-letter topic, retries, idempotency; tracing. Teaching project: diagrams, eli5 explainers, lessons.
