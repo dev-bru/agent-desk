@@ -1,7 +1,6 @@
 """Handle deliveries with durable keys, bounded retries, and dead letters."""
 
 from collections.abc import Callable
-import logging
 import math
 import random
 import sqlite3
@@ -11,9 +10,9 @@ from uuid import uuid4
 from agent_desk.bus import Bus, Consumer, Record
 from agent_desk.handled import Handled
 from agent_desk.messages import BadMessage, Message, parse_message
+from agent_desk.telemetry import log_event, redact, ticket_span
 
 
-logger = logging.getLogger(__name__)
 DEAD_LETTER_TOPIC = "desk.dead-letter"
 
 
@@ -41,22 +40,29 @@ class Runner:
 
     def process(self, record: Record, subscription: Consumer) -> None:
         """Retry one delivery, then acknowledge success or its dead letter."""
+        component = {"resolver": "resolve", "resolver-decisions": "resolve"}.get(self.consumer, self.consumer)
+        with ticket_span(component, record.key, record.topic, record.headers):
+            self._process(record, subscription, component)
+
+    def _process(self, record, subscription, component):
         try:
             message = parse_message(record.value)
             key = f"{message.ticket_id}:{self.stage}"
             if record.headers.get("idempotency-key", key.encode()) != key.encode():
                 raise BadMessage("Invalid message field: idempotency-key")
         except BadMessage as exc:
+            log_event(component, record.key, "", 0, "bad_message", "WARNING")
             self._dead_letter(record, str(exc), 0)
             subscription.commit(record)
             return
 
         for attempt in range(1, self.max_attempts + 1):
             record.headers["attempt"] = str(attempt).encode()
-            logger.info("handle ticket_id=%s message_id=%s attempt=%d", message.ticket_id, message.message_id, attempt)
+            log_event(component, message.ticket_id, str(message.message_id), attempt, "handle")
             try:
                 self.handled.run(self.consumer, key, lambda connection: self.handler(message, connection))
             except Exception as exc:
+                log_event(component, message.ticket_id, str(message.message_id), attempt, "failed", "WARNING")
                 if isinstance(exc, BadMessage) or attempt == self.max_attempts:
                     self._dead_letter(record, str(exc), attempt)
                     break
@@ -64,6 +70,7 @@ class Runner:
                 delay = self.backoff_base_s * 2 ** (attempt - 1)
                 self.sleep(delay + self.jitter(0, self.backoff_base_s * 0.1))
             else:
+                log_event(component, message.ticket_id, str(message.message_id), attempt, "handled")
                 break
         subscription.commit(record)
 
@@ -78,7 +85,7 @@ class Runner:
     def _dead_letter(self, record: Record, reason: str, attempts: int) -> None:
         headers = dict(record.headers)
         headers.update({
-            "dlq-reason": reason.encode("utf-8"),
+            "dlq-reason": redact(reason).encode("utf-8"),
             "dlq-source-topic": record.topic.encode("utf-8"),
             "dlq-attempts": str(attempts).encode(),
         })

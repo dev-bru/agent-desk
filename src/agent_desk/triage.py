@@ -12,6 +12,7 @@ from agent_desk.handled import Handled
 from agent_desk.messages import BadMessage, Payload, TicketCreatedEnvelope, TicketTriaged, TicketTriagedEnvelope
 from agent_desk.model import ModelError
 from agent_desk.runner import Runner
+from agent_desk.telemetry import message_headers
 
 
 class Classification(Payload):
@@ -59,7 +60,7 @@ class Triage:
             ),
         )
         self.bus.publish("desk.work", message.ticket_id, work.model_dump_json().encode("utf-8"),
-                         {"idempotency-key": f"{message.ticket_id}:resolve".encode("utf-8")})
+                         message_headers(message.ticket_id, "resolve"))
 
     def runner(self, handled: Handled, **kwargs) -> Runner:
         """Wrap the handler with durable keys, retries, and dead letters."""

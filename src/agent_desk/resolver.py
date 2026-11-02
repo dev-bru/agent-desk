@@ -8,15 +8,17 @@ from uuid import NAMESPACE_URL, uuid5
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import interrupt
+from langgraph.types import Command, interrupt
 from pydantic import Field, ValidationError
 
 from agent_desk.bus import Bus
 from agent_desk.handled import Handled
 from agent_desk.messages import BadMessage, Payload, TicketResolved, TicketResolvedEnvelope, TicketTriagedEnvelope
+from agent_desk.messages import ApprovalDecided, ApprovalDecidedEnvelope, ApprovalRequested, ApprovalRequestedEnvelope
 from agent_desk.model import ModelError
 from agent_desk.runner import Runner
 from agent_desk.settings import Settings, load_settings
+from agent_desk.telemetry import message_headers
 
 
 class ResolverState(TypedDict, total=False):
@@ -137,12 +139,15 @@ def build_graph(model, tools, checkpointer: SqliteSaver, *, refund_limit: float 
         return "reply"
 
     def await_approval(state):
-        """Pause large refunds until the approval feature supplies a decision."""
-        interrupt({"ticket_id": state["ticket_id"], "order_id": state["ticket"]["order_id"],
-                   "amount": state["proposed_refund"], "limit": refund_limit})
-        # The decision consumer and approval actions are added in F-007.
-        return {"status": "escalated", "reply": "Human approval is required.",
-                "steps": state["steps"] + ["await_approval"]}
+        """Pause until a human approves or declines the proposed refund."""
+        decision = ApprovalDecided.model_validate(interrupt({
+            "ticket_id": state["ticket_id"], "order_id": state["ticket"]["order_id"],
+            "amount": state["proposed_refund"], "limit": min(refund_limit, state["policy"]["auto_limit"]),
+        }))
+        update = {"approval": decision.model_dump(), "steps": state["steps"] + ["await_approval"]}
+        if not decision.approved:
+            update.update(status="declined", reply=f"Refund declined. {decision.note}")
+        return update
 
     def act(state):
         """Issue the refund with the ticket's stable refund key."""
@@ -173,7 +178,7 @@ def build_graph(model, tools, checkpointer: SqliteSaver, *, refund_limit: float 
     graph.add_conditional_edges("plan", lambda state: "reply" if state.get("status") == "escalated" else "gather")
     graph.add_edge("gather", "decide")
     graph.add_conditional_edges("decide", route)
-    graph.add_edge("await_approval", "reply")
+    graph.add_conditional_edges("await_approval", lambda state: "act" if state["approval"]["approved"] else "reply")
     graph.add_edge("act", "reply")
     graph.add_edge("reply", END)
     return graph.compile(checkpointer=checkpointer, interrupt_after=interrupt_after)
@@ -201,7 +206,7 @@ class Resolver:
         config = {"configurable": {"thread_id": message.ticket_id},
                   "recursion_limit": 2 * self.max_model_calls + 10}
         saved = self.graph.get_state(config)
-        if saved.values and not saved.next:
+        if saved.values and (not saved.next or saved.interrupts):
             return saved.values
         initial = None if saved.values else {
             "ticket_id": message.ticket_id, "ticket": message.payload.model_dump(),
@@ -215,10 +220,50 @@ class Resolver:
         """Publish a finished result or leave a large refund paused."""
         state = self.run(message)
         if "result" not in state:
+            saved = self.graph.get_state({"configurable": {"thread_id": message.ticket_id}})
+            if saved.interrupts:
+                request = ApprovalRequestedEnvelope(
+                    message_id=uuid5(NAMESPACE_URL, f"agent-desk:{message.ticket_id}:approval"),
+                    ticket_id=message.ticket_id, created_at=message.created_at, type="approval.requested",
+                    payload=ApprovalRequested(
+                        order_id=state["ticket"]["order_id"], amount=state["proposed_refund"],
+                        reason=state["reply"] or state["ticket"]["text"],
+                        limit=min(self.settings.refund_limit, state["policy"]["auto_limit"]),
+                    ),
+                )
+                self.bus.publish("desk.approvals.requests", message.ticket_id,
+                                 request.model_dump_json().encode("utf-8"),
+                                 message_headers(message.ticket_id, "approval"))
             return
+        self._publish_result(message.ticket_id, state)
+
+    def _publish_result(self, ticket_id, state):
         result = TicketResolvedEnvelope.model_validate(state["result"])
-        self.bus.publish("desk.results", message.ticket_id, result.model_dump_json().encode("utf-8"),
-                         {"idempotency-key": f"{message.ticket_id}:resolve".encode("utf-8")})
+        self.bus.publish("desk.results", ticket_id, result.model_dump_json().encode("utf-8"),
+                         message_headers(ticket_id, "resolve"))
+
+    def decide(self, message, connection: sqlite3.Connection) -> None:
+        """Resume a saved approval without repeating earlier model or shop calls."""
+        if not isinstance(message, ApprovalDecidedEnvelope):
+            raise BadMessage("Decision consumer requires approval.decided")
+        config = {"configurable": {"thread_id": message.ticket_id},
+                  "recursion_limit": 2 * self.max_model_calls + 10}
+        saved = self.graph.get_state(config)
+        if not saved.values or (not saved.interrupts and "approval" not in saved.values):
+            raise BadMessage("Decision needs a pending approval")
+        if saved.interrupts:
+            state = self.graph.invoke(Command(resume=message.payload.model_dump()), config)
+        elif saved.next:
+            state = self.graph.invoke(None, config)
+        else:
+            state = saved.values
+        if "result" not in state:
+            raise RuntimeError("Decision did not reach a result")
+        self._publish_result(message.ticket_id, state)
+
+    def decision_runner(self, handled: Handled, **kwargs) -> Runner:
+        """Keep decision keys separate from the paused work keys."""
+        return Runner(self.bus, handled, "resolver-decisions", "decision", self.decide, **kwargs)
 
     def runner(self, handled: Handled, **kwargs) -> Runner:
         """Wrap graph work with durable duplicate handling and retries."""

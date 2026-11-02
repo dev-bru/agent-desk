@@ -1,0 +1,40 @@
+{"ticket_id": "T-100", "customer_id": "C-1", "text": "Please refund my damaged item.", "order_id": "O-1", "channel": "email", "category": "refund", "priority": "normal"}
+{"ticket_id": "T-101", "customer_id": "C-2", "text": "I returned the order and need my money back.", "order_id": "O-2", "channel": "email", "category": "refund", "priority": "high"}
+{"ticket_id": "T-102", "customer_id": "C-1", "text": "The product broke on arrival. Please refund it.", "order_id": "O-1", "channel": "email", "category": "refund", "priority": "low"}
+{"ticket_id": "T-103", "customer_id": "C-2", "text": "Cancel this order and return my payment.", "order_id": "O-2", "channel": "email", "category": "refund", "priority": "normal"}
+{"ticket_id": "T-104", "customer_id": "C-1", "text": "My item was missing. I want a refund.", "order_id": "O-1", "channel": "email", "category": "refund", "priority": "high"}
+{"ticket_id": "T-105", "customer_id": "C-2", "text": "I received the wrong item and want my money back.", "order_id": "O-2", "channel": "email", "category": "refund", "priority": "low"}
+{"ticket_id": "T-106", "customer_id": "C-1", "text": "Please refund the duplicate charge.", "order_id": "O-1", "channel": "email", "category": "refund", "priority": "normal"}
+{"ticket_id": "T-107", "customer_id": "C-2", "text": "The item was faulty. Can I get a refund?", "order_id": "O-2", "channel": "email", "category": "refund", "priority": "high"}
+{"ticket_id": "T-108", "customer_id": "C-1", "text": "Where is my order?", "order_id": "O-1", "channel": "email", "category": "order_status", "priority": "normal"}
+{"ticket_id": "T-109", "customer_id": "C-2", "text": "Can you check my order status?", "order_id": "O-2", "channel": "email", "category": "order_status", "priority": "high"}
+{"ticket_id": "T-110", "customer_id": "C-1", "text": "Has my order left the shop?", "order_id": "O-1", "channel": "email", "category": "order_status", "priority": "low"}
+{"ticket_id": "T-111", "customer_id": "C-2", "text": "When will my mug arrive?", "order_id": "O-2", "channel": "email", "category": "order_status", "priority": "normal"}
+{"ticket_id": "T-112", "customer_id": "C-1", "text": "Please tell me whether my order has shipped.", "order_id": "O-1", "channel": "email", "category": "order_status", "priority": "high"}
+{"ticket_id": "T-113", "customer_id": "C-2", "text": "I need an update on my purchase.", "order_id": "O-2", "channel": "email", "category": "order_status", "priority": "low"}
+{"ticket_id": "T-114", "customer_id": "C-1", "text": "Is my package still being prepared?", "order_id": "O-1", "channel": "email", "category": "order_status", "priority": "normal"}
+{"ticket_id": "T-115", "customer_id": "C-2", "text": "Has the shop sent my order yet?", "order_id": "O-2", "channel": "email", "category": "order_status", "priority": "high"}
+{"ticket_id": "T-116", "customer_id": "C-1", "text": "The carrier says my parcel is delayed.", "order_id": "O-1", "channel": "email", "category": "shipping", "priority": "normal"}
+{"ticket_id": "T-117", "customer_id": "C-2", "text": "Can I change the delivery address?", "order_id": "O-2", "channel": "email", "category": "shipping", "priority": "high"}
+{"ticket_id": "T-118", "customer_id": "C-1", "text": "The tracking link is not working.", "order_id": "O-1", "channel": "email", "category": "shipping", "priority": "low"}
+{"ticket_id": "T-119", "customer_id": "C-2", "text": "My parcel was sent to the wrong address.", "order_id": "O-2", "channel": "email", "category": "shipping", "priority": "normal"}
+{"ticket_id": "T-120", "customer_id": "C-1", "text": "The carrier could not deliver my package.", "order_id": "O-1", "channel": "email", "category": "shipping", "priority": "high"}
+{"ticket_id": "T-121", "customer_id": "C-2", "text": "My shipment has stopped moving.", "order_id": "O-2", "channel": "email", "category": "shipping", "priority": "low"}
+{"ticket_id": "T-122", "customer_id": "C-1", "text": "Please check the expected delivery date.", "order_id": "O-1", "channel": "email", "category": "shipping", "priority": "normal"}
+{"ticket_id": "T-123", "customer_id": "C-2", "text": "The delivery driver missed my building.", "order_id": "O-2", "channel": "email", "category": "shipping", "priority": "high"}
+{"ticket_id": "T-124", "customer_id": "C-1", "text": "What size is this mug?", "order_id": null, "channel": "email", "category": "product", "priority": "normal"}
+{"ticket_id": "T-125", "customer_id": "C-2", "text": "Does the shirt come in blue?", "order_id": null, "channel": "email", "category": "product", "priority": "high"}
+{"ticket_id": "T-126", "customer_id": "C-1", "text": "How do I wash this product?", "order_id": null, "channel": "email", "category": "product", "priority": "low"}
+{"ticket_id": "T-127", "customer_id": "C-2", "text": "Is this item safe in a dishwasher?", "order_id": null, "channel": "email", "category": "product", "priority": "normal"}
+{"ticket_id": "T-128", "customer_id": "C-1", "text": "What material is the shirt made from?", "order_id": null, "channel": "email", "category": "product", "priority": "high"}
+{"ticket_id": "T-129", "customer_id": "C-2", "text": "Can you explain the size chart?", "order_id": null, "channel": "email", "category": "product", "priority": "low"}
+{"ticket_id": "T-130", "customer_id": "C-1", "text": "Does the mug have a lid?", "order_id": null, "channel": "email", "category": "product", "priority": "normal"}
+{"ticket_id": "T-131", "customer_id": "C-2", "text": "What colors are available?", "order_id": null, "channel": "email", "category": "product", "priority": "high"}
+{"ticket_id": "T-132", "customer_id": "C-1", "text": "How can I change my account name?", "order_id": null, "channel": "email", "category": "other", "priority": "normal"}
+{"ticket_id": "T-133", "customer_id": "C-2", "text": "I cannot sign into my account.", "order_id": null, "channel": "email", "category": "other", "priority": "high"}
+{"ticket_id": "T-134", "customer_id": "C-1", "text": "Where can I find your opening hours?", "order_id": null, "channel": "email", "category": "other", "priority": "low"}
+{"ticket_id": "T-135", "customer_id": "C-2", "text": "Can you send me a receipt?", "order_id": null, "channel": "email", "category": "other", "priority": "normal"}
+{"ticket_id": "T-136", "customer_id": "C-1", "text": "How do I unsubscribe from updates?", "order_id": null, "channel": "email", "category": "other", "priority": "high"}
+{"ticket_id": "T-137", "customer_id": "C-2", "text": "I need help updating my email.", "order_id": null, "channel": "email", "category": "other", "priority": "low"}
+{"ticket_id": "T-138", "customer_id": "C-1", "text": "Do you have a gift card service?", "order_id": null, "channel": "email", "category": "other", "priority": "normal"}
+{"ticket_id": "T-139", "customer_id": "C-2", "text": "I want to thank your support team.", "order_id": null, "channel": "email", "category": "other", "priority": "high"}
