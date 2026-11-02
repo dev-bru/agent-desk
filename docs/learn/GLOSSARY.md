@@ -27,7 +27,7 @@
 - **Idempotency key**: stable string for one unit of work, `<ticket_id>:<stage>`.
 - **interrupt**: LangGraph call that pauses a graph until resumed.
 - **Jitter**: small random extra delay to spread retries.
-- **Kafka**: distributed log for events. Planned here (F-010).
+- **Kafka**: distributed log for events. `KafkaBus` is in `kafka_bus.py:50` (F-010).
 - **KRaft**: Kafka mode with no ZooKeeper.
 - **Key (record)**: value that picks the partition and keeps order; here `ticket_id`.
 - **LangGraph**: library for stateful LLM workflows as graphs.
@@ -58,3 +58,8 @@
 - **Topic**: named log, such as `desk.tickets`.
 - **Trust boundary**: place where data from outside enters and must be validated.
 - **UUID5**: UUID made from a name; the same name gives the same id.
+- **Broker**: the Kafka server process. Here one local broker, `scripts/kafka-local.ps1`.
+- **KRaft**: Kafka's own metadata log (Raft). It replaces ZooKeeper. One process can be broker and controller.
+- **Offset**: the position of a record in a partition. A commit stores the NEXT offset to read (`kafka_bus.py:123`).
+- **Rebalance**: Kafka moves partitions between the members of a group. Uncommitted work is read again.
+- **Retention**: how long Kafka keeps records. Here ten years, so Windows never deletes a log file.

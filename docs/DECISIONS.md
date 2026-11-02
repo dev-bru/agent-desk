@@ -68,3 +68,11 @@ started by a documented PowerShell script. Kafka does not officially support Win
 long-running broker on Windows can hit log-deletion file-lock errors, so retention is set high for demos and the
 broker is stopped when idle. Fallback: a remote EC2 Kafka (UNVERIFIED; no resource created by agents). The in-memory
 bus stays the default for tests; Kafka tests stay opt-in through `AGENT_DESK_KAFKA_BOOTSTRAP`.
+
+## D-018 Kafka tools started with java directly, not the .bat files (F-010, 2026-11-02)
+MEASURED: `bin\windows\kafka-storage.bat` and `kafka-server-start.bat` fail with "The input line is too long"
+because `kafka-run-class.bat` puts all 109 jars on one cmd line (limit 8191 characters) and this project path is
+long. `scripts/kafka-local.ps1` runs `java -cp <kafka>\libs\*` with the same main classes and log4j files
+(`kafka.Kafka`, `kafka.tools.StorageTool`, `org.apache.kafka.tools.TopicCommand`). The 512 MB heap default is the
+script's choice (the .bat default is 1 GB). The commit rule: `KafkaBus` commits (synchronous, offset + 1) only
+after the handler returns; a failed handler is redelivered because the group bookmark did not move.

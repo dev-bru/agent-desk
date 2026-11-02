@@ -51,7 +51,7 @@ Only features with status `passing` in `feature_list.json` are taught in depth.
 | F-007 Human approval: interrupt, decisions topic, approver | coming next | only a stub exists (see lesson 6) |
 | F-008 Structured logs, OpenTelemetry traces | coming next | not covered |
 | F-009 Simulator, CLI wiring, triage eval | coming next | not covered |
-| F-010 Native Kafka on Windows, KafkaBus | coming next | shown as "planned" in the diagram |
+| F-010 Native Kafka on Windows, KafkaBus | built (`kafka_bus.py`, `scripts/kafka-local.ps1`) | shown as "planned" in the diagram |
 | F-011 Lessons 01-06 in the project | coming next | this pack is the deeper layer; lesson names here start with `deep-` |
 
 ## Learning path

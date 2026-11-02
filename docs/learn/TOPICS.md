@@ -40,8 +40,8 @@ two interview questions. Line numbers were checked on 2026-11-02 against the cur
 - **eli5.** Kafka is a very sturdy, very fast "box" that keeps notes on disk for days and lets many teams read at
   their own speed.
 - **Why industry uses it.** Durable replayable log, high throughput, partitioned ordering, a big ecosystem.
-  (General knowledge; UNVERIFIED for this project until F-010.)
-- **Here.** Planned `KafkaBus` (F-010, not built). `MemoryBus` copies the rules that matter so the logic is proven
+  (General knowledge; the short runs on this PC are MEASURED, see section 14.)
+- **Here.** `KafkaBus` `kafka_bus.py:50` (F-010, built). `MemoryBus` copies the rules that matter so the logic is proven
   first (decision D-004, D-013 in `docs/DECISIONS.md`). Kafka on Windows is dev only (D-017).
 - **Not picked.** Redpanda (D-002), RabbitMQ or SQS (no replayable log by default; UNVERIFIED detail), Avro and a
   schema registry (D-014).
@@ -185,3 +185,27 @@ two interview questions. Line numbers were checked on 2026-11-02 against the cur
 - **Mistake.** A fake that is more forgiving than the real thing. `MemoryBus` copies redelivery and key order on
   purpose.
 - **Q.** *How do you test "crash after the handler"?* Make `commit` raise (`tests/test_runner.py:22`).
+
+## 14. Kafka offsets, manual commit, redelivery (F-010)
+
+- **eli5.** Each team (group) has a bookmark in the roll of paper. The bookmark says "next line to read". If you
+  move the bookmark BEFORE you finish the work and then crash, the line is lost. So move it AFTER the work.
+  If you crash before moving it, the next reader starts at the same line: you see it twice, never zero times.
+- **Why industry uses it.** This is how a consumer gets at-least-once delivery. The price is duplicates, so the
+  handler must be idempotent.
+- **Here.** `enable.auto.commit` is False `kafka_bus.py:79-81`. `poll` keeps one pending record
+  `kafka_bus.py:98-116`. `commit` writes offset + 1 and waits for the broker `kafka_bus.py:118-125`. `close` does
+  not commit `kafka_bus.py:127-130`. Offline proof with a fake client: `tests/test_kafka_bus_offline.py:58`
+  (log order: handled, then commit). Live proof: `tests/kafka/test_kafka_live.py:43` (no commit, new consumer
+  in the same group gets the record again).
+- **Not picked.** Auto commit (commits on a timer, can commit work that never finished); async commit (the
+  program could go on before the broker has saved the bookmark); Kafka transactions (exactly-once is not claimed;
+  they do not cover the database write).
+- **Mistakes.** Committing `offset` instead of `offset + 1` (the same record comes back forever); committing
+  before the handler; reading ahead while a record is pending, then committing a later offset (skips the failed
+  record).
+- **Q1.** *When do you commit and why?* After the handler returns. A crash then gives a duplicate, not a loss.
+- **Q2.** *What does a consumer group rebalance do to uncommitted work?* The partition moves to another member,
+  which starts at the last committed offset, so uncommitted records are delivered again.
+- **Q3.** *Why is Kafka on Windows only for development?* Apache does not officially support it; file-locking
+  errors on log deletion are known (DOCUMENTED, README caveat). High retention avoids deletion.

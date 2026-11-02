@@ -3,7 +3,7 @@
 An event-driven support desk for a fictional shop. Triage classifies tickets;
 LangGraph resolves them through MCP shop tools. Large refunds pause for a person.
 The offline implementation uses `MemoryBus` and scripted model replies. Kafka is
-planned for F-010. See `docs/PRODUCT_SPEC.md` and `feature_list.json` for the spec.
+ready as `KafkaBus` (F-010; see "Local Kafka" below). See `docs/PRODUCT_SPEC.md` and `feature_list.json` for the spec.
 
 ## Run offline
 
@@ -63,9 +63,36 @@ MemoryBus lives in one process. Separate terminal invocations of `simulate`,
 creates tickets and drains both agents in one process. For a shared offline session,
 call `agent_desk.cli.main([...], bus=bus)` with the same `MemoryBus`; tests show the
 full sequence. `run triage` and `run resolver` drain their selected stage, and
-`run resolver` also consumes decisions. Cross-process topic persistence comes in F-010.
+`run resolver` also consumes decisions. Cross-process topic persistence needs `KafkaBus` (see "Local Kafka"); the CLI is not wired to it yet.
 The pending page reconstructs its view from requests and decisions, collapsing
 repeated requests and hiding tickets that have a decision.
+
+## Local Kafka (F-010)
+
+Kafka runs natively on Windows with no Docker: Java 21 (Temurin) plus the Apache Kafka 4.3.2 binary
+unpacked at `.kafka/kafka_2.13-4.3.2` (git-ignored). Kafka 4 uses KRaft only, so there is no ZooKeeper.
+The broker settings are in `config/kafka/server.properties`; the script copies them to `.kafka/server.properties`.
+
+```powershell
+powershell -File scripts/kafka-local.ps1 start     # sets up .kafka/data on first run, then waits for port 9092
+powershell -File scripts/kafka-local.ps1 topics    # create the desk topics; safe to run again
+powershell -File scripts/kafka-local.ps1 status
+$env:AGENT_DESK_KAFKA_BOOTSTRAP = "127.0.0.1:9092"
+uv run pytest -m kafka -n 0 -v                     # opt-in tests against the live broker
+powershell -File scripts/kafka-local.ps1 stop      # always stop it when idle
+```
+
+Without `AGENT_DESK_KAFKA_BOOTSTRAP` the kafka tests skip with a reason. With it set and no broker, the run stops
+with one message. `src/agent_desk/kafka_bus.py` has `KafkaBus`; it commits the offset only after the handler
+returns, so delivery is at-least-once (exactly-once is not claimed). The CLI still uses `MemoryBus`.
+
+Caveats:
+- Kafka on native Windows is not officially supported by Apache, and file-locking errors
+  on log deletion are known. Retention is set to ten years so the broker never deletes logs in a demo. Use it for
+  development only. UNVERIFIED beyond the short runs measured on this PC (see `docs/DECISIONS.md`).
+- Fallback: a remote Kafka on an EC2 machine that the human creates, reached through
+  `AGENT_DESK_KAFKA_BOOTSTRAP`. UNVERIFIED: it is not set up. Agents never create cloud resources.
+- Ports 9092 and 9093 on 127.0.0.1 only. Ports 8080, 8081, 8083 and 8084 are reserved and unused.
 
 ## Learn and check
 

@@ -1,6 +1,6 @@
 # Deep lesson 1: events, topics, consumers, and why Kafka
 
-Features covered: F-002 (messages, Bus, MemoryBus). Passing. Kafka itself is F-010 (coming next).
+Features covered: F-002 (messages, Bus, MemoryBus). Passing. Kafka itself is F-010; see the last section.
 
 ## Problem
 
@@ -70,3 +70,34 @@ change after (do not commit it).
    workers, and the audit worker.*
 3. Why does `poll` keep returning the same record until commit? *So the consumer cannot skip work by polling
    again; the record is redelivered if the consumer dies before commit.*
+
+## Kafka: offsets and redelivery (F-010)
+
+`KafkaBus` (`src/agent_desk/kafka_bus.py:50`) has the same methods as `MemoryBus`, so the runner does not change.
+
+1. A consumer joins a group with `enable.auto.commit` off (`kafka_bus.py:79-81`). Kafka never moves the bookmark
+   by itself.
+2. `poll` reads one record and keeps it as pending (`kafka_bus.py:98-116`). Polling again returns the same
+   record. Nothing is read ahead, so a later commit cannot skip a failed record.
+3. The handler runs. If it raises, nobody calls `commit`.
+4. `commit` stores `offset + 1` and waits for the broker (`kafka_bus.py:118-125`). `offset + 1` is the next
+   record to read.
+5. `close` does not commit (`kafka_bus.py:127-130`). The next consumer in the group starts at the old bookmark and
+   gets the record again. That is at-least-once; exactly-once is not claimed.
+
+Offline proof: `tests/test_kafka_bus_offline.py:58` logs "handled" before "commit" with a fake client.
+Live proof (needs the broker): `tests/kafka/test_kafka_live.py:43` closes a consumer without commit, and a new
+consumer in the same group gets the same offset.
+
+Run it (MEASURED 2026-11-02, Kafka 4.3.2 on this PC):
+
+```powershell
+powershell -File scripts/kafka-local.ps1 start
+powershell -File scripts/kafka-local.ps1 topics
+$env:AGENT_DESK_KAFKA_BOOTSTRAP = "127.0.0.1:9092"; uv run pytest -m kafka -n 0 -v   # 3 passed
+powershell -File scripts/kafka-local.ps1 stop
+```
+
+Break it: in `commit`, change `record.offset + 1` to `record.offset`. Predicted (not run): the live tests still
+pass, but after a restart the last committed record comes back once more. Is that still at-least-once? Why is it a
+bug anyway?

@@ -22,5 +22,11 @@ Hashes and transitive versions remain in `uv.lock`. Licences and upstream releas
 The build backend is hatchling, declared without a version in the existing pyproject.toml.
 It is not a runtime dependency and has no entry in the supplied uv.lock.
 
-Java 21 Temurin JDK and the Apache Kafka binary distribution are deferred to F-010.
-Their host installation and exact versions are unverified. No Docker or cloud resources are used.
+Host tools (not Python packages; set up by the human, F-010):
+
+| Tool | Version | Source | Check |
+|---|---|---|---|
+| Eclipse Temurin JDK | 21.0.13+9 | winget `EclipseAdoptium.Temurin.21.JDK`, installed by the human 2026-11-02 | `C:\Program Files\Eclipse Adoptium\jdk-21.0.13.9-hotspot` |
+| Apache Kafka | 4.3.2 (`kafka_2.13-4.3.2.tgz`, 135,281,924 bytes) | https://downloads.apache.org/kafka/4.3.2/ | SHA-512 verified against the published `.sha512` (2026-11-02); unpacked to `.kafka/` (git-ignored) |
+
+No Docker or cloud resources are used.
