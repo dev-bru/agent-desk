@@ -73,7 +73,9 @@
         "issue_refund with the same idempotency key refunds once"
       ],
       "test_command": "uv run pytest tests/test_shop_db.py tests/test_mcp_server.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793616418,
+      "baseline_tests": 10
     },
     {
       "id": "F-005",
@@ -89,7 +91,9 @@
         "invalid model output gets one repair prompt, then raises; triage is idempotent"
       ],
       "test_command": "uv run pytest tests/test_model.py tests/test_fakes.py tests/test_triage.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793616427,
+      "baseline_tests": 19
     },
     {
       "id": "F-006",
@@ -105,7 +109,9 @@
         "resolver publishes exactly one result per idempotency key to desk.results"
       ],
       "test_command": "uv run pytest tests/test_resolver.py",
-      "status": "failing"
+      "status": "passing",
+      "last_verified": 1793616442,
+      "baseline_tests": 10
     },
     {
       "id": "F-007",
