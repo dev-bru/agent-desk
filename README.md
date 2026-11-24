@@ -141,3 +141,15 @@ must be marked `live` and selected explicitly. Ruff is not configured.
 
 Quiz: What happens if triage crashes after publishing work? Why can a human pause
 survive a resolver restart? What does a perfect score from the copying fake prove?
+
+## Tech stack
+
+Python 3.12, LangGraph, LiteLLM, FastMCP, Pydantic, OpenTelemetry, Kafka (confluent-kafka), SQLite, pytest, uv. Exact versions are pinned in `pyproject.toml` and `uv.lock`.
+
+## Learning pack
+
+Start with [docs/learn/00-START-HERE.md](docs/learn/00-START-HERE.md) (architecture, glossary, lessons).
+
+## License
+
+MIT, see `LICENSE`.

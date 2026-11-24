@@ -26,7 +26,7 @@ The aim of the project is to learn how real agent systems survive crashes, repea
 
 ## Run it offline in 3 commands
 
-From `D:\Projects\agent-desk` in PowerShell:
+From the `agent-desk` project folder in PowerShell:
 
 ```powershell
 .venv\Scripts\python.exe -m pytest -q -m "not live"          # all offline tests

@@ -10,3 +10,9 @@ runs/
 *.db
 .codex-tmp/
 .kafka/
+.pytest-*/
+.codex-tmp/
+.env.*
+node_modules/
+.harness/
+.tmp/

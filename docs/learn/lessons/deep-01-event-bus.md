@@ -50,7 +50,7 @@ flowchart LR
 ## Run it
 
 ```powershell
-cd D:\Projects\agent-desk
+cd agent-desk
 .venv\Scripts\python.exe -m pytest -q tests/test_memory_bus.py tests/test_messages.py -p no:cacheprovider
 ```
 
